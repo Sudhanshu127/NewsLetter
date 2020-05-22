@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
@@ -18,7 +19,7 @@ import java.util.Properties;
 public class HelloConsumer {
     private static final Logger logger = LogManager.getLogger(HelloConsumer.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         logger.info("Starting HelloConsumer...");
         logger.trace("Creating Kafka Consumer...");
         Properties props = new Properties();
@@ -31,6 +32,8 @@ public class HelloConsumer {
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        logger.trace("Sending connection request to elasticsearch");
+        ElasticSearchQuery.makeConnection();
         try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
             logger.trace("Start reading messages from test...");
             consumer.subscribe(Collections.singleton("test"));
@@ -41,16 +44,17 @@ public class HelloConsumer {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<String, String> record : records) {
 
-                    logger.trace("Creating tweet");
                     if(record.value().charAt(0) != '{')
                         continue;
+                    logger.trace("Creating tweet");
                     JSONObject currentJson = new JSONObject(record.value());
                     Tweet tweet = new Tweet();
                     tweet.setText(currentJson.get("text").toString())
                          .setHighlight(currentJson.get("highlight").toString())
                          .setScore(Double.parseDouble(currentJson.get("score").toString()))
                          .setUrl(currentJson.get("url").toString());
-                    System.out.println(tweet);
+                    Tweet myTweet = ElasticSearchQuery.insertTweet(tweet);
+                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
                 }
             }
         } catch (KafkaException | JSONException e) {
@@ -59,5 +63,7 @@ public class HelloConsumer {
         } finally {
             logger.info("Finished HelloProducer - Closing Kafka Consumer.");
         }
+        logger.trace("Closing connection with elasticsearch");
+        ElasticSearchQuery.closeConnection();
     }
 }

@@ -3,6 +3,8 @@ package com.examples.NewsLetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHost;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ElasticSearchQuery {
+    private static final Logger logger = LogManager.getLogger(ElasticSearchQuery.class);
     //The config parameters for the connection
     private static final String HOST = "localhost";
     private static final int PORT_ONE = 9200;
@@ -39,7 +42,7 @@ public class ElasticSearchQuery {
      * so that there is just one connection at a time.
      */
     static synchronized void makeConnection() {
-
+        logger.info("Making Connection");
         if(restHighLevelClient == null) {
             restHighLevelClient = new RestHighLevelClient(
                     RestClient.builder(
@@ -50,18 +53,26 @@ public class ElasticSearchQuery {
     }
 
     static synchronized void closeConnection() throws IOException {
+        logger.info("Closing Connection");
         restHighLevelClient.close();
         restHighLevelClient = null;
     }
 
     static Tweet insertTweet(Tweet tweet){
+        logger.info("Inserting tweet");
+        logger.trace("Creating dataMap for tweet");
         tweet.setTweetId(UUID.randomUUID().toString());
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("tweetId", tweet.getTweetId());
-//        dataMap.put("content", tweet.getContent());
+        dataMap.put("text", tweet.getText());
+//        dataMap.put("highlight", tweet.getHighlight());
+//        dataMap.put("url", tweet.getUrl());
+//        dataMap.put("score", tweet.getScore());
+        logger.trace("Creating request");
         IndexRequest indexRequest = new IndexRequest(INDEX).id(tweet.getTweetId())
                 .source(dataMap);
         try {
+            logger.trace("Sending request");
             IndexResponse response = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
         } catch(ElasticsearchException e) {
             e.getDetailedMessage();
