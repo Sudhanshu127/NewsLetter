@@ -13,35 +13,49 @@ import java.util.Properties;
 
 public class HelloProducer {
     private static final Logger logger = LogManager.getLogger(HelloProducer.class);
-
-    public static void main(String[] args) {
-        String topicName;
-        int numEvents;
-
-        if (args.length != 2) {
-            System.out.println("Please provide command line arguments: topicName numEvents");
-            System.exit(-1);
-        }
-        topicName = args[0];
-        numEvents = Integer.parseInt(args[1]);
+    private static HelloProducer instance = null;
+    private static Properties props = null;
+    private static final String topic = "test";
+    private HelloProducer(){
+//        String topicName;
+//        int numEvents;
+//
+//        if (args.length != 2) {
+//            System.out.println("Please provide command line arguments: topicName numEvents");
+//            System.exit(-1);
+//        }
+//        topicName = args[0];
+//        numEvents = Integer.parseInt(args[1]);
         logger.info("Starting HelloProducer...");
-        logger.debug("topicName=" + topicName + ", numEvents=" + numEvents);
+//        logger.debug("topicName=" + topicName + ", numEvents=" + numEvents);
         logger.trace("Creating Kafka Producer...");
-        Properties props = new Properties();
+        props = new Properties();
         props.put(ProducerConfig.CLIENT_ID_CONFIG, "HelloProducer");
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+    }
+
+    public static HelloProducer getInstance(){
+        logger.trace("Fetching instance");
+        if(instance == null)
+            instance = new HelloProducer();
+        return instance;
+    }
+
+    void produceTweet(String tweet) {
         try (KafkaProducer<Integer, String> producer = new KafkaProducer<>(props)) {
-            logger.trace("Start sending messages...");
-            for (int i = 1; i <= numEvents; i++) {
-                producer.send(new ProducerRecord<>(topicName, i, "Simple Message-" + i));
-            }
+            logger.trace("Start sending tweet...");
+//            for (int i = 1; i <= numEvents; i++) {
+                producer.send(new ProducerRecord<>(topic, tweet));
+//            }
         } catch (KafkaException e) {
             logger.error("Exception occurred - Check log for more details.\n" + e.getMessage());
             System.exit(-1);
         } finally {
             logger.info("Finished HelloProducer - Closing Kafka Producer.");
         }
+
     }
 }

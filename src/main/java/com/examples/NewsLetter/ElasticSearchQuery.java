@@ -37,9 +37,8 @@ public class ElasticSearchQuery {
     /**
      * Implemented Singleton pattern here
      * so that there is just one connection at a time.
-     * @return RestHighLevelClient
      */
-    private static synchronized RestHighLevelClient makeConnection() {
+    static synchronized void makeConnection() {
 
         if(restHighLevelClient == null) {
             restHighLevelClient = new RestHighLevelClient(
@@ -48,19 +47,18 @@ public class ElasticSearchQuery {
                             new HttpHost(HOST, PORT_TWO, SCHEME)));
         }
 
-        return restHighLevelClient;
     }
 
-    private static synchronized void closeConnection() throws IOException {
+    static synchronized void closeConnection() throws IOException {
         restHighLevelClient.close();
         restHighLevelClient = null;
     }
 
-    private static Tweet insertTweet(Tweet tweet){
+    static Tweet insertTweet(Tweet tweet){
         tweet.setTweetId(UUID.randomUUID().toString());
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("tweetId", tweet.getTweetId());
-        dataMap.put("content", tweet.getContent());
+//        dataMap.put("content", tweet.getContent());
         IndexRequest indexRequest = new IndexRequest(INDEX).id(tweet.getTweetId())
                 .source(dataMap);
         try {
@@ -73,7 +71,7 @@ public class ElasticSearchQuery {
         return tweet;
     }
 
-    private static Tweet getTweetById(String id){
+    static Tweet getTweetById(String id){
         GetRequest getTweetRequest = new GetRequest(INDEX, id);
         GetResponse getResponse = null;
         try {
@@ -85,7 +83,7 @@ public class ElasticSearchQuery {
                 objectMapper.convertValue(getResponse.getSourceAsMap(), Tweet.class) : null;
     }
 
-    private static Tweet updateTweetById(String id, Tweet tweet){
+    static Tweet updateTweetById(String id, Tweet tweet){
         UpdateRequest updateRequest = new UpdateRequest(INDEX, id)
                 .fetchSource(true);    // Fetch Object after its update
         try {
@@ -102,7 +100,7 @@ public class ElasticSearchQuery {
         return null;
     }
 
-    private static void deleteTweetById(String id) {
+    static void deleteTweetById(String id) {
         DeleteRequest deleteRequest = new DeleteRequest(INDEX, id);
         try {
             DeleteResponse deleteResponse = restHighLevelClient.delete(deleteRequest, RequestOptions.DEFAULT);
@@ -111,30 +109,30 @@ public class ElasticSearchQuery {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+//    public static void main(String[] args) throws IOException {
+//
+//        makeConnection();
 
-        makeConnection();
+//        System.out.println("Inserting a new Tweet with content 'Hello World'...");
+//        Tweet tweet = new Tweet();
+//        tweet.setContent("Hello World");
+//        Tweet tweet2 = insertTweet(tweet);
+//        System.out.println("Tweet inserted --> " + tweet2);
+//
+//        System.out.println("Changing content to `New World`...");
+//        tweet2.setContent("New World");
+//        updateTweetById(tweet.getTweetId(), tweet2);
+//        System.out.println("Tweet updated  --> " + tweet2);
+//
+//        System.out.println("Getting content...");
+//        Tweet tweetFromDB = getTweetById(tweet2.getTweetId());
+//        System.out.println("Tweet from DB  --> " + tweetFromDB);
+//
+//        System.out.println("Deleting content...");
+//        assert tweetFromDB != null;
+//        deleteTweetById(tweetFromDB.getTweetId());
+//        System.out.println("Tweet Deleted");
 
-        System.out.println("Inserting a new Tweet with content 'Hello World'...");
-        Tweet tweet = new Tweet();
-        tweet.setContent("Hello World");
-        Tweet tweet2 = insertTweet(tweet);
-        System.out.println("Tweet inserted --> " + tweet2);
-
-        System.out.println("Changing content to `New World`...");
-        tweet2.setContent("New World");
-        updateTweetById(tweet.getTweetId(), tweet2);
-        System.out.println("Tweet updated  --> " + tweet2);
-
-        System.out.println("Getting content...");
-        Tweet tweetFromDB = getTweetById(tweet2.getTweetId());
-        System.out.println("Tweet from DB  --> " + tweetFromDB);
-
-        System.out.println("Deleting content...");
-        assert tweetFromDB != null;
-        deleteTweetById(tweetFromDB.getTweetId());
-        System.out.println("Tweet Deleted");
-
-        closeConnection();
-    }
+//        closeConnection();
+//    }
 }
