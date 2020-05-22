@@ -19,7 +19,7 @@ import java.util.Properties;
 public class HelloConsumer {
     private static final Logger logger = LogManager.getLogger(HelloConsumer.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main() throws IOException {
         logger.info("Starting HelloConsumer...");
         logger.trace("Creating Kafka Consumer...");
         Properties props = new Properties();
@@ -29,7 +29,7 @@ public class HelloConsumer {
 //        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 100);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "consumer-tutorial3");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+//        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         logger.trace("Sending connection request to elasticsearch");
@@ -41,6 +41,7 @@ public class HelloConsumer {
             while (temp > 0) {
                 temp = temp -1;
                 logger.trace("Time remaining :- " + temp);
+                int i=1;
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<String, String> record : records) {
 
@@ -53,8 +54,10 @@ public class HelloConsumer {
                          .setHighlight(currentJson.get("highlight").toString())
                          .setScore(Double.parseDouble(currentJson.get("score").toString()))
                          .setUrl(currentJson.get("url").toString());
+                    logger.info("Inserting tweet " + i);
+                    i++;
                     Tweet myTweet = ElasticSearchQuery.insertTweet(tweet);
-                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
+//                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
                 }
             }
         } catch (KafkaException | JSONException e) {

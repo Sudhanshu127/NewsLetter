@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
 
 public class FetchAPI {
     private static final Logger logger = LogManager.getLogger(FetchAPI.class);
-    public static void main(String[] args) throws IOException, JSONException {
+    public static void main() throws IOException, JSONException {
 
         String url = "https://api.newsriver.io/v2/search?query=text%3AHey&sortBy=_score&sortOrder=DESC&limit=15";
 

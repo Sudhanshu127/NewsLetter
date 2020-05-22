@@ -65,9 +65,9 @@ public class ElasticSearchQuery {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("tweetId", tweet.getTweetId());
         dataMap.put("text", tweet.getText());
-//        dataMap.put("highlight", tweet.getHighlight());
-//        dataMap.put("url", tweet.getUrl());
-//        dataMap.put("score", tweet.getScore());
+        dataMap.put("highlight", tweet.getHighlight());
+        dataMap.put("url", tweet.getUrl());
+        dataMap.put("score", tweet.getScore());
         logger.trace("Creating request");
         IndexRequest indexRequest = new IndexRequest(INDEX).id(tweet.getTweetId())
                 .source(dataMap);
@@ -119,31 +119,4 @@ public class ElasticSearchQuery {
             e.getLocalizedMessage();
         }
     }
-
-//    public static void main(String[] args) throws IOException {
-//
-//        makeConnection();
-
-//        System.out.println("Inserting a new Tweet with content 'Hello World'...");
-//        Tweet tweet = new Tweet();
-//        tweet.setContent("Hello World");
-//        Tweet tweet2 = insertTweet(tweet);
-//        System.out.println("Tweet inserted --> " + tweet2);
-//
-//        System.out.println("Changing content to `New World`...");
-//        tweet2.setContent("New World");
-//        updateTweetById(tweet.getTweetId(), tweet2);
-//        System.out.println("Tweet updated  --> " + tweet2);
-//
-//        System.out.println("Getting content...");
-//        Tweet tweetFromDB = getTweetById(tweet2.getTweetId());
-//        System.out.println("Tweet from DB  --> " + tweetFromDB);
-//
-//        System.out.println("Deleting content...");
-//        assert tweetFromDB != null;
-//        deleteTweetById(tweetFromDB.getTweetId());
-//        System.out.println("Tweet Deleted");
-
-//        closeConnection();
-//    }
 }
