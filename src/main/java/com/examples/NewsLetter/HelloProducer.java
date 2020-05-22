@@ -11,12 +11,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
-public class HelloProducer {
+public class HelloProducer implements Runnable{
     private static final Logger logger = LogManager.getLogger(HelloProducer.class);
-    private static HelloProducer instance = null;
     private static Properties props = null;
-    private static final String topic = "test";
-    private HelloProducer(){
+    private String topic = "test";
+    private String tweet = "{}";
+    HelloProducer(String topic, String tweet){
         logger.info("Starting HelloProducer...");
         logger.trace("Creating Kafka Producer...");
         props = new Properties();
@@ -24,20 +24,20 @@ public class HelloProducer {
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
+        this.topic = topic;
+        this.tweet = tweet;
     }
 
-    public static HelloProducer getInstance(){
-        logger.trace("Fetching instance");
-        if(instance == null)
-            instance = new HelloProducer();
-        return instance;
+    public void run() {
+        System.out.println(Thread.currentThread().getName()+" (Start)");
+        produceTweet();
+        System.out.println(Thread.currentThread().getName()+" (End)");
     }
 
-    void produceTweet(String tweet) {
+    void produceTweet() {
         try (KafkaProducer<Integer, String> producer = new KafkaProducer<>(props)) {
             logger.trace("Start sending tweet...");
-                producer.send(new ProducerRecord<>(topic, tweet));
+                producer.send(new ProducerRecord<>(this.topic, this.tweet));
         } catch (KafkaException e) {
             logger.error("Exception occurred - Check log for more details.\n" + e.getMessage());
             System.exit(-1);

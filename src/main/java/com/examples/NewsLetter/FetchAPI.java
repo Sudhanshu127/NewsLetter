@@ -14,6 +14,8 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FetchAPI {
     private static final Logger logger = LogManager.getLogger(FetchAPI.class);
@@ -44,13 +46,19 @@ public class FetchAPI {
         JSONObject json = new JSONObject(sb.toString());
         JSONArray jsonArray = json.getJSONArray("response");
 
+        logger.trace("Creating a thread poll for producers");
+        ExecutorService executor = Executors.newFixedThreadPool(5);//creating a pool of 5 threads
+
         logger.trace("Fetching json objects");
-        HelloProducer producer = HelloProducer.getInstance();
         for(int i = 0; i < jsonArray.length(); i++)
         {
             JSONObject currentJson = jsonArray.getJSONObject(i);
             logger.trace("Sending jsonTweet to producer");
-            producer.produceTweet(currentJson.toString());
+            HelloProducer producer = new HelloProducer("test", currentJson.toString());
+            executor.execute(producer);
         }
+        executor.shutdown();
+        while (!executor.isTerminated()) {  }
+        System.out.println("Finished all threads");
     }
 }

@@ -54,7 +54,7 @@ public class HelloConsumer {
                          .setHighlight(currentJson.get("highlight").toString())
                          .setScore(Double.parseDouble(currentJson.get("score").toString()))
                          .setUrl(currentJson.get("url").toString());
-                    logger.info("Inserting tweet " + i);
+                    logger.trace("Inserting tweet " + i);
                     i++;
                     Tweet myTweet = ElasticSearchQuery.insertTweet(tweet);
 //                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
