@@ -6,13 +6,6 @@ import java.io.IOException;
 
 public class Newsletter {
     public static void main(String[] args) {
-        Thread consumerThread = new Thread(() -> {
-            try {
-                HelloConsumer.main();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
         Thread fetchThread = new Thread(()-> {
             try {
                 FetchAPI.main();
@@ -20,7 +13,22 @@ public class Newsletter {
                 e.printStackTrace();
             }
         });
-        consumerThread.start();
         fetchThread.start();
+        for(int i=0; i<5; i++)
+        {
+            consumer("Consumer" + i);
+        }
+    }
+
+    public static void consumer(String name){
+        Thread consumerThread = new Thread(() -> {
+            try {
+                HelloConsumer.main(name);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        consumerThread.start();
+
     }
 }

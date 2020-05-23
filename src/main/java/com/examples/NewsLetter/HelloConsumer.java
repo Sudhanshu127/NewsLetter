@@ -19,11 +19,12 @@ import java.util.Properties;
 public class HelloConsumer {
     private static final Logger logger = LogManager.getLogger(HelloConsumer.class);
 
-    public static void main() throws IOException {
-        logger.info("Starting HelloConsumer...");
+    public static void main(String name) throws IOException {
+//        System.out.println("Starting "+ name +"...");
+        logger.info("Starting "+ name +"...");
         logger.trace("Creating Kafka Consumer...");
         Properties props = new Properties();
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, "HelloConsumer");
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, name);
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 //        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1024);
 //        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 100);
@@ -64,7 +65,7 @@ public class HelloConsumer {
             logger.error("Exception occurred - Check log for more details.\n" + e.getMessage());
             System.exit(-1);
         } finally {
-            logger.info("Finished HelloProducer - Closing Kafka Consumer.");
+            logger.info("Finished HelloConsumer - Closing Kafka Consumer.");
         }
         logger.trace("Closing connection with elasticsearch");
         ElasticSearchQuery.closeConnection();

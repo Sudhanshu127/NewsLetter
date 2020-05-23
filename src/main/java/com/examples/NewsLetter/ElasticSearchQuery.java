@@ -31,6 +31,7 @@ public class ElasticSearchQuery {
     private static final int PORT_ONE = 9200;
     private static final int PORT_TWO = 9201;
     private static final String SCHEME = "http";
+    private static int users = 0;
 
     private static RestHighLevelClient restHighLevelClient = null;
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -49,13 +50,17 @@ public class ElasticSearchQuery {
                             new HttpHost(HOST, PORT_ONE, SCHEME),
                             new HttpHost(HOST, PORT_TWO, SCHEME)));
         }
+        users = users + 1;
 
     }
 
     static synchronized void closeConnection() throws IOException {
-        logger.info("Closing Connection");
-        restHighLevelClient.close();
-        restHighLevelClient = null;
+        if(users == 1 && restHighLevelClient != null) {
+            logger.info("Closing Connection");
+            restHighLevelClient.close();
+            restHighLevelClient = null;
+        }
+        users = users - 1;
     }
 
     static Tweet insertTweet(Tweet tweet){
