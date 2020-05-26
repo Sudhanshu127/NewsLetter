@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticSearchQuery {
     private static final Logger logger = LogManager.getLogger(ElasticSearchQuery.class);
@@ -32,11 +33,12 @@ public class ElasticSearchQuery {
     private static final int PORT_TWO = 9201;
     private static final String SCHEME = "http";
     private static int users = 0;
+    static AtomicInteger counter = new AtomicInteger(0);
 
     private static RestHighLevelClient restHighLevelClient = null;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String INDEX = "tweetdata";
+    private static final String INDEX = "tweetdata2";
 
     /**
      * Implemented Singleton pattern here
@@ -66,7 +68,7 @@ public class ElasticSearchQuery {
     static Tweet insertTweet(Tweet tweet){
         logger.info("Inserting tweet");
         logger.trace("Creating dataMap for tweet");
-        tweet.setTweetId(UUID.randomUUID().toString());
+        tweet.setTweetId(Integer.toString(counter.getAndIncrement()));
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("tweetId", tweet.getTweetId());
         dataMap.put("text", tweet.getText());

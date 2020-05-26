@@ -7,6 +7,7 @@ public class Tweet {
     private String url;
     private String highlight;
     private double score;
+    private String discoverDate;
 
 
     //standard getters and setters

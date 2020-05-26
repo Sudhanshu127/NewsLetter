@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
-public class HelloProducer implements Runnable{
+public class HelloProducer{
     private static final Logger logger = LogManager.getLogger(HelloProducer.class);
     private static Properties props = null;
     private String topic = "test";
@@ -26,12 +26,7 @@ public class HelloProducer implements Runnable{
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         this.topic = topic;
         this.tweet = tweet;
-    }
-
-    public void run() {
-        System.out.println(Thread.currentThread().getName()+" (Start)");
         produceTweet();
-        System.out.println(Thread.currentThread().getName()+" (End)");
     }
 
     void produceTweet() {

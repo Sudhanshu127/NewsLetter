@@ -1,0 +1,1 @@
+curl -X GET "http://localhost:9200/tweetdata2/_mapping?pretty"

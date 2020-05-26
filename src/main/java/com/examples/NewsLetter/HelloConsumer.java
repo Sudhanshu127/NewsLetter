@@ -16,10 +16,25 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-public class HelloConsumer {
+public class HelloConsumer implements Runnable{
     private static final Logger logger = LogManager.getLogger(HelloConsumer.class);
+    private final String name;
+    public HelloConsumer(String s) {
+        this.name = s;
+    }
 
-    public static void main(String name) throws IOException {
+    public void run(){
+        System.out.println(Thread.currentThread().getName()+" (Start)");
+        try {
+            main();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(Thread.currentThread().getName()+" (End)");
+    }
+
+
+    public void main() throws IOException {
 //        System.out.println("Starting "+ name +"...");
         logger.info("Starting "+ name +"...");
         logger.trace("Creating Kafka Consumer...");
@@ -38,11 +53,10 @@ public class HelloConsumer {
         try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
             logger.trace("Start reading messages from test...");
             consumer.subscribe(Collections.singleton("test"));
-            int temp = 10;
-            while (temp > 0) {
-                temp = temp -1;
-                logger.trace("Time remaining :- " + temp);
-                int i=1;
+            int i=1;
+            while (true) {
+//                temp = temp -1;
+//                logger.trace("Time remaining :- " + temp);
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<String, String> record : records) {
 
@@ -55,10 +69,10 @@ public class HelloConsumer {
                          .setHighlight(currentJson.get("highlight").toString())
                          .setScore(Double.parseDouble(currentJson.get("score").toString()))
                          .setUrl(currentJson.get("url").toString());
-                    logger.trace("Inserting tweet " + i);
+                    System.out.println(name + " is inserting tweet " + i);
                     i++;
                     Tweet myTweet = ElasticSearchQuery.insertTweet(tweet);
-//                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
+                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
                 }
             }
         } catch (KafkaException | JSONException e) {

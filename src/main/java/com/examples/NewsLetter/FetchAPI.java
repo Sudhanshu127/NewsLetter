@@ -14,12 +14,16 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class FetchAPI {
-    private static final Logger logger = LogManager.getLogger(FetchAPI.class);
-    public static void main() throws IOException, JSONException {
+public class FetchAPI  implements Runnable{
+    private static Logger logger = null;
+    private final int queryDate;
+
+    FetchAPI(int queryDate){
+        logger = LogManager.getLogger(FetchAPI.class);
+        this.queryDate = queryDate;
+    }
+    public static void main() throws IOException{
 
         String url = "https://api.newsriver.io/v2/search?query=text%3AHey&sortBy=_score&sortOrder=DESC&limit=15";
 
@@ -30,35 +34,72 @@ public class FetchAPI {
         request.addHeader("Authorization", Tokens.getNewsriverToken());
 
         logger.trace("Getting response");
-        CloseableHttpResponse response = client.execute(request);
-        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        CloseableHttpResponse response = null;
+        try {
+            response = client.execute(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BufferedReader rd = null;
+        if (response != null) {
+            rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        }
 
         logger.trace("Converting to string");
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"response\":");
-        String line;
-        while ((line = rd.readLine()) != null) {
+        String line = null;
+        while (true) {
+            try {
+                if (rd != null && (line = rd.readLine()) == null) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             sb.append(line);
         }
         sb.append('}');
 
         logger.trace("Converting to json array");
-        JSONObject json = new JSONObject(sb.toString());
-        JSONArray jsonArray = json.getJSONArray("response");
-
-        logger.trace("Creating a thread poll for producers");
-        ExecutorService executor = Executors.newFixedThreadPool(5);//creating a pool of 5 threads
+        JSONObject json = null;
+        try {
+            json = new JSONObject(sb.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = null;
+        try {
+            if (json != null) {
+                jsonArray = json.getJSONArray("response");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         logger.trace("Fetching json objects");
-        for(int i = 0; i < jsonArray.length(); i++)
-        {
-            JSONObject currentJson = jsonArray.getJSONObject(i);
-            logger.trace("Sending jsonTweet to producer");
-            HelloProducer producer = new HelloProducer("test", currentJson.toString());
-            executor.execute(producer);
+        if (jsonArray != null) {
+            for(int i = 0; i < jsonArray.length(); i++)
+            {
+                JSONObject currentJson = null;
+                try {
+                    currentJson = jsonArray.getJSONObject(i);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                logger.trace("Sending jsonTweet to producer");
+                if (currentJson != null) {
+                    HelloProducer producer = new HelloProducer("test", currentJson.toString());
+                }
+            }
         }
-        executor.shutdown();
-        while (!executor.isTerminated()) {  }
-        System.out.println("Finished all threads");
+    }
+
+    public void run() {
+        System.out.println(Thread.currentThread().getName()+" (Start)");
+        try {
+            main();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(Thread.currentThread().getName()+" (End)");
     }
 }
