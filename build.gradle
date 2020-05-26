@@ -10,9 +10,10 @@ repositories {
 }
 
 task startKalka(type: Exec) {
-    commandLine './scripts/start-zookeeper.bash'
+    workingDir "scripts/"
+    commandLine './start-zookeeper.bash'
     doLast {
-        commandLine './scripts/start-kafka.bash'
+        commandLine './start-kafka.bash'
     }
 }
 

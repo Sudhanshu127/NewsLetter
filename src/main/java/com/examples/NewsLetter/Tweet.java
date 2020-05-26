@@ -20,8 +20,9 @@ public class Tweet {
                              "      highlight = '%s',\n" +
                              "      score = '%f'\n" +
                              "      text = '%s'\n" +
+                             "      discoverDate = '%s'\n" +
                              "     }",
-                tweetId, url, highlight, score, text);
+                tweetId, url, highlight, score, text, discoverDate);
     }
 
     public String getTweetId() {
@@ -63,6 +64,15 @@ public class Tweet {
 
     public Tweet setScore(double score) {
         this.score = score;
+        return this;
+    }
+
+    public String getDiscoverDate() {
+        return discoverDate;
+    }
+
+    public Tweet setDiscoverDate(String discoverDate) {
+        this.discoverDate = discoverDate;
         return this;
     }
 

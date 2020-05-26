@@ -1,5 +1,7 @@
 package com.examples.NewsLetter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -8,8 +10,6 @@ import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,6 +18,7 @@ import java.util.Properties;
 
 public class HelloConsumer implements Runnable{
     private static final Logger logger = LogManager.getLogger(HelloConsumer.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final String name;
     public HelloConsumer(String s) {
         this.name = s;
@@ -55,27 +56,20 @@ public class HelloConsumer implements Runnable{
             consumer.subscribe(Collections.singleton("test"));
             int i=1;
             while (true) {
-//                temp = temp -1;
-//                logger.trace("Time remaining :- " + temp);
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<String, String> record : records) {
 
                     if(record.value().charAt(0) != '{')
                         continue;
                     logger.trace("Creating tweet");
-                    JSONObject currentJson = new JSONObject(record.value());
-                    Tweet tweet = new Tweet();
-                    tweet.setText(currentJson.get("text").toString())
-                         .setHighlight(currentJson.get("highlight").toString())
-                         .setScore(Double.parseDouble(currentJson.get("score").toString()))
-                         .setUrl(currentJson.get("url").toString());
+                    Tweet tweet = objectMapper.readValue(record.value(),Tweet.class);
                     System.out.println(name + " is inserting tweet " + i);
                     i++;
                     Tweet myTweet = ElasticSearchQuery.insertTweet(tweet);
-                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
+//                    System.out.println(ElasticSearchQuery.getTweetById(myTweet.getTweetId()));
                 }
             }
-        } catch (KafkaException | JSONException e) {
+        } catch (KafkaException e) {
             logger.error("Exception occurred - Check log for more details.\n" + e.getMessage());
             System.exit(-1);
         } finally {

@@ -1,4 +1,4 @@
-curl -X PUT "localhost:9200/tweetdata2?pretty" -H 'Content-Type: application/json' -d'
+curl -X PUT "localhost:9200/tweetdata3?pretty" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "properties": {
@@ -6,7 +6,8 @@ curl -X PUT "localhost:9200/tweetdata2?pretty" -H 'Content-Type: application/jso
       "text":  { "type": "text"  },
       "url":   { "type": "keyword" , "index" : false },
       "highlight":   { "type": "text"  },
-      "score":   { "type": "double"  }
+      "score":   { "type": "double"  },
+      "discoverDate" : {"type" : "date" }
     }
   }
 }

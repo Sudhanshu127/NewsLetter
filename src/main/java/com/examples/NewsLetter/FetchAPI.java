@@ -17,15 +17,16 @@ import java.io.InputStreamReader;
 
 public class FetchAPI  implements Runnable{
     private static Logger logger = null;
-    private final int queryDate;
+    private String queryDate = "";
 
-    FetchAPI(int queryDate){
+    FetchAPI(String queryDate){
         logger = LogManager.getLogger(FetchAPI.class);
         this.queryDate = queryDate;
     }
-    public static void main() throws IOException{
+    public void main() throws IOException{
+        System.out.println(queryDate);
 
-        String url = "https://api.newsriver.io/v2/search?query=text%3AHey&sortBy=_score&sortOrder=DESC&limit=15";
+        String url = "https://api.newsriver.io/v2/search?query=discoverDate%3A%5B"+queryDate+"%20TO%20"+queryDate+"%5D&sortBy=discoverDate&sortOrder=ASC&limit=100";
 
 
         logger.trace("Building request");

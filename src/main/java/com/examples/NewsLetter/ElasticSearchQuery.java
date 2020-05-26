@@ -75,6 +75,7 @@ public class ElasticSearchQuery {
         dataMap.put("highlight", tweet.getHighlight());
         dataMap.put("url", tweet.getUrl());
         dataMap.put("score", tweet.getScore());
+        dataMap.put("discoverDate", tweet.getDiscoverDate());
         logger.trace("Creating request");
         IndexRequest indexRequest = new IndexRequest(INDEX).id(tweet.getTweetId())
                 .source(dataMap);
