@@ -9,12 +9,21 @@ repositories {
     mavenCentral()
 }
 
-task startKalka(type: Exec) {
+task startZookeeper(type: Exec) {
     workingDir "scripts/"
-    commandLine './start-zookeeper.bash'
-    doLast {
-        commandLine './start-kafka.bash'
-    }
+    commandLine 'bash', './start-zookeeper.bash'
+}
+
+task startKafka(type: Exec) {
+    workingDir "scripts/"
+    commandLine 'bash', './start-kafka.bash'
+}
+
+task runApp(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class"
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.examples.NewsLetter.Newsletter'
 }
 
 dependencies {

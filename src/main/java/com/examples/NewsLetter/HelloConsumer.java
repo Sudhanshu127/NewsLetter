@@ -36,7 +36,6 @@ public class HelloConsumer implements Runnable{
 
 
     public void main() throws IOException {
-//        System.out.println("Starting "+ name +"...");
         logger.info("Starting "+ name +"...");
         logger.trace("Creating Kafka Consumer...");
         Properties props = new Properties();
