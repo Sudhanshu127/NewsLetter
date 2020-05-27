@@ -9,21 +9,28 @@ repositories {
     mavenCentral()
 }
 
-task startZookeeper(type: Exec) {
-    workingDir "scripts/"
-    commandLine 'bash', './start-zookeeper.bash'
-}
+//task startZookeeper(type: Exec) {
+//    workingDir "scripts/"
+//    commandLine 'bash', './start-zookeeper.bash'
+//}
+//
+//task startKafka(type: Exec) {
+//    workingDir "scripts/"
+//    commandLine 'bash', './start-kafka.bash'
+//}
 
-task startKafka(type: Exec) {
-    workingDir "scripts/"
-    commandLine 'bash', './start-kafka.bash'
-}
-
-task runApp(type: JavaExec) {
+task runProducer(type: JavaExec) {
     group = "Execution"
-    description = "Run the main class"
+    description = "Run the main Fetch and Producer class"
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.examples.NewsLetter.Newsletter'
+    main = 'com.examples.NewsLetter.NewsLetterProduce'
+}
+
+task runConsumer(type: JavaExec) {
+    group = "Execution"
+    description = "Run the Consumer class"
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.examples.NewsLetter.NewsLetterConsume'
 }
 
 dependencies {
